@@ -38,6 +38,18 @@ foreach ($comment in 'Teardown of an untracked flow:', 'Teardown of a flow we ar
     if ($index -lt 0 -or $index - $pos -gt 600) { throw 'Unrecognized TCP connection guard' }
     $core = $core.Substring(0,$index) + 'if (!tcp_header->Syn || tcp_header->Ack || tcp_header->Fin || tcp_header->Rst)' + $core.Substring($index + 'if (tcp_header->Fin || tcp_header->Rst)'.Length)
 }
+# Only WinDivert's locally redirected packets may reach the two relay ports from
+# a non-loopback source. Fresh packets arriving from a physical NIC are discarded.
+$anchor = '        if (ip_header == NULL)'
+if ([regex]::Matches($core,[regex]::Escape($anchor)).Count -ne 1) { throw 'Unexpected packet dispatch layout' }
+$guard = @'
+        if (!addr.Outbound && !addr.Loopback &&
+            ((tcp_header && tcp_header->DstPort == htons(g_local_relay_port)) ||
+             (udp_header && udp_header->DstPort == htons(LOCAL_UDP_RELAY_PORT))))
+            continue;
+
+'@
+$core = $core.Replace($anchor, $guard + $anchor)
 [IO.File]::WriteAllText("$src/ProxyBridge.c", $core)
 Push-Location $src
 try {

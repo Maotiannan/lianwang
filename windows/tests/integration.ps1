@@ -52,11 +52,6 @@ try {
     $app=(Get-Item $app).FullName; $other=(Get-Item $other).FullName
     Explicit 'LOCAL'
     Choose $other 'proxy'
-    # Injected WAN traffic arrives from this synthetic remote IP at the private relay.
-    foreach($entry in @{TCP=34010;UDP=34011}.GetEnumerator()) {
-        New-NetFirewallRule -DisplayName "Fixture $($entry.Key)" -Program $exe.Replace('/','\') -Direction Inbound -Action Allow -Protocol $entry.Key -LocalPort $entry.Value -RemoteAddress 192.0.2.81 | Out-Null
-    }
-    Get-NetTCPConnection -LocalPort 34010,29842 -State Listen | Select-Object LocalPort,OwningProcess | Format-Table
     $guard=Start-Process $other "$dir/heartbeat" -PassThru -RedirectStandardError "$dir/guard.err"
     $children += $guard
     for($i=0;$i -lt 60 -and !(Test-Path "$dir/heartbeat.ready");$i++) {Start-Sleep -Milliseconds 250}

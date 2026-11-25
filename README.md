@@ -22,4 +22,4 @@ Windows 安装程序和管理界面目前未作代码签名。企业驱动策略
 
 ### 构建
 
-Windows x64，Visual Studio C++ 工具链、.NET 10 SDK 和 Inno Setup 6。在 x64 开发者 PowerShell 运行 `windows/packaging/build.ps1`。该脚本锁定 [ProxyBridge 4.3.0 源码](https://github.com/InterceptSuite/ProxyBridge/tree/v4.3.0_Windows) 和 [WinDivert 2.2.2 发布包](https://github.com/basil00/WinDivert/releases/tag/v2.2.2)，只编译用户态转发库，保留系统防火墙策略。许可证随安装包分发。Windows 集成测试只在一次性 GitHub Actions 虚拟机执行。
+Windows x64，Visual Studio C++ 工具链、.NET 10 SDK 和 Inno Setup 6。在 x64 开发者 PowerShell 运行 `windows/packaging/build.ps1`。该脚本锁定 [ProxyBridge 4.3.0 源码](https://github.com/InterceptSuite/ProxyBridge/tree/v4.3.0_Windows) 和 [WinDivert 2.2.2 发布包](https://github.com/basil00/WinDivert/releases/tag/v2.2.2)，只编译用户态转发库，为后台程序添加 TCP 34010、UDP 34011 两条限定端口的防火墙规则，驱动过滤来自物理网卡的外部入站访问。许可证随安装包分发。Windows 集成测试只在一次性 GitHub Actions 虚拟机执行。

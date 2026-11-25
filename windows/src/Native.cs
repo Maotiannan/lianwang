@@ -17,6 +17,12 @@ internal sealed class Native : IDisposable
 
     internal void Start(string token)
     {
+        // Upstream reports a driver handle independently of its relay bind results.
+        // Refuse collisions before opening the interception handle.
+        var network = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
+        if (network.GetActiveTcpListeners().Any(e => e.Port == 34010) ||
+            network.GetActiveUdpListeners().Any(e => e.Port == 34011))
+            throw new IOException("转发端口 34010/TCP 或 34011/UDP 已被其他程序占用。");
         proxy = ProxyBridge_AddProxyConfig(1, "127.0.0.1", 29842, "lw", token, false);
         if (proxy == 0 || !ProxyBridge_Start())
             throw new InvalidOperationException("WinDivert 驱动启动失败，请检查 Windows 安全中心和应用兼容性。");

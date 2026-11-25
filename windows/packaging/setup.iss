@@ -29,6 +29,8 @@ Root: HKLM; Subkey: "Software\LianwangWindows"; Flags: uninsdeletekey
 Filename: "{app}\Lianwang.exe"; Parameters: "--prepare"; Flags: runasoriginaluser runhidden waituntilterminated
 Filename: "{app}\Lianwang.exe"; Flags: runasoriginaluser nowait skipifsilent
 [UninstallRun]
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Lianwang Windows relay TCP"" program=""{app}\Lianwang.exe"""; Flags: runhidden waituntilterminated
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""Lianwang Windows relay UDP"" program=""{app}\Lianwang.exe"""; Flags: runhidden waituntilterminated
 Filename: "{app}\Lianwang.exe"; Parameters: "--remove-hook"; Flags: runhidden waituntilterminated
 Filename: "{sys}\sc.exe"; Parameters: "stop LianwangWindows"; Flags: runhidden waituntilterminated
 Filename: "{sys}\sc.exe"; Parameters: "delete LianwangWindows"; Flags: runhidden waituntilterminated
@@ -46,6 +48,11 @@ begin
     Exe := ExpandConstant('{app}\Lianwang.exe');
     Sc := ExpandConstant('{sys}\sc.exe');
     Checked(Exe, '--owner');
+    if not RegValueExists(HKLM64, 'SOFTWARE\LianwangWindows', 'FirewallV1') then begin
+      Checked(ExpandConstant('{sys}\netsh.exe'), 'advfirewall firewall add rule name="Lianwang Windows relay TCP" dir=in action=allow program="' + Exe + '" protocol=TCP localport=34010 profile=any');
+      Checked(ExpandConstant('{sys}\netsh.exe'), 'advfirewall firewall add rule name="Lianwang Windows relay UDP" dir=in action=allow program="' + Exe + '" protocol=UDP localport=34011 profile=any');
+      RegWriteDWordValue(HKLM64, 'SOFTWARE\LianwangWindows', 'FirewallV1', 1);
+    end;
     Exists := Exec(Sc, 'query LianwangWindows', '', SW_HIDE, ewWaitUntilTerminated, Code) and (Code = 0);
     if not Exists then
       Checked(Sc, 'create LianwangWindows binPath= "\"' + Exe + '\" --service" start= auto DisplayName= "联网后台"');
