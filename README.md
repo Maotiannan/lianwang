@@ -23,3 +23,15 @@ Windows 安装程序和管理界面目前未作代码签名。企业驱动策略
 ### 构建
 
 Windows x64，Visual Studio C++ 工具链、.NET 10 SDK 和 Inno Setup 6。在 x64 开发者 PowerShell 运行 `windows/packaging/build.ps1`。该脚本锁定 [ProxyBridge 4.3.0 源码](https://github.com/InterceptSuite/ProxyBridge/tree/v4.3.0_Windows) 和 [WinDivert 2.2.2 发布包](https://github.com/basil00/WinDivert/releases/tag/v2.2.2)，只编译用户态转发库，为后台程序添加 TCP 34010、UDP 34011 两条限定端口的防火墙规则，驱动过滤来自物理网卡的外部入站访问。许可证随安装包分发。Windows 集成测试只在一次性 GitHub Actions 虚拟机执行。
+
+## Android
+
+支持 Android 10 及以上的 arm64 手机和 x86_64 设备。首次点「开启」时，Android 会询问是否允许建立本机 VPN。同一用户配置内，Android 一次允许一个 VPN。可使用电脑或路由器上的 SOCKS5，或手机上以纯代理模式运行的客户端。
+
+1. 安装 APK，点「出口设置」，填入手机可达的 `socks5://主机:端口`。需要认证时可填 `socks5://用户名:密码@主机:端口`。代理服务器需要支持 UDP ASSOCIATE 才能转发 UDP。
+2. 如果有按 Clash 规则分流的独立入口，可填入「自动模式的规则入口」。留空时，自动模式沿用应用提出的连接目的地，通过原网络转发。用于「代理」的入口应指向实际代理出口。
+3. 点「开启」，再点每个应用旁的「自动」「直连」或「代理」。VPN 已运行时，切换应用只更新其新连接的选择。关闭 VPN 会结束由它承载的连接。
+
+列表显示具有启动图标的应用。分流依赖 Android 报告的套接字 UID，共享 UID 的应用一起切换。系统无法归属的连接采用自动策略。本机回环连接和应用自行封装的代理协议有各自的路由边界。系统 DNS 由底层网络提供。规则和代理凭据存于 Android 应用私有目录中，已关闭系统备份。
+
+构建需要 Go 1.26、JDK 17、Gradle 8.11.1、Android SDK 35 和 NDK 28。运行 `android/build.sh` 生成 APK。Android 使用 [tun2socks](https://github.com/xjasonlyu/tun2socks/tree/v2.7.0) 和 [Android VpnService](https://developer.android.com/develop/connectivity/vpn)。测试用两个独立 UID 的小程序在模拟器中验证出口，覆盖同一对 TCP / UDP 套接字持续通信期间的应用切换。

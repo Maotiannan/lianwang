@@ -5,3 +5,10 @@ deps/
 *.user
 .vs/
 .DS_Store
+.gradle/
+build/
+*.aar
+*.apk
+*.keystore
+*.jks
+local.properties
