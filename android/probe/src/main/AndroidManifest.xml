@@ -1,8 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
     <application android:label="Routing test probe" android:usesCleartextTraffic="true">
-        <activity android:name=".Probe" android:exported="true" android:launchMode="standard">
+        <activity android:name="android.app.Activity" android:exported="true">
             <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
         </activity>
+        <service android:name=".Probe" android:exported="true"/>
     </application>
 </manifest>

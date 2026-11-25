@@ -12,3 +12,4 @@ build/
 *.keystore
 *.jks
 local.properties
+android/app/src/main/assets/third-party.txt

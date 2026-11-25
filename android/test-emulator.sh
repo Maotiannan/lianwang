@@ -12,4 +12,7 @@ adb shell appops set "$pkg" ACTIVATE_VPN allow
 adb shell am start -W -n "$pkg/.MainActivity"
 result=$(adb shell am instrument -w "$pkg.test/$pkg.RoutingChecks")
 echo "$result"
-[[ "$result" == *"passed real app UID routing"* && "$result" == *"INSTRUMENTATION_CODE: -1"* ]]
+if [[ "$result" != *"passed real app UID routing"* || "$result" != *"INSTRUMENTATION_CODE: -1"* ]]; then
+  adb logcat -d -s AndroidRuntime:E GoLog:E Vpn:E ActivityManager:W | tail -90
+  exit 1
+fi

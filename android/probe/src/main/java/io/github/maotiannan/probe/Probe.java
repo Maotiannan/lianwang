@@ -1,16 +1,20 @@
 package io.github.maotiannan.probe;
 
-import android.app.Activity;
+import android.app.Service;
+import android.content.Intent;
 import android.os.*;
 import java.net.*;
 import java.io.*;
 
-public class Probe extends Activity {
-    @Override public void onCreate(Bundle b){
-        super.onCreate(b);
-        ResultReceiver result=getIntent().getParcelableExtra("result");
-        if(result==null){finish();return;}
-        boolean hold=getIntent().getBooleanExtra("hold",false);
+public class Probe extends Service {
+    private final Messenger messenger=new Messenger(new Handler(Looper.getMainLooper(), msg->{
+        ResultReceiver result=msg.getData().getParcelable("result");
+        boolean hold=msg.getData().getBoolean("hold");
+        if(result!=null) run(result,hold);
+        return true;
+    }));
+    @Override public IBinder onBind(Intent intent){return messenger.getBinder();}
+    private void run(ResultReceiver result,boolean hold){
         new Thread(()->{
             try {
                 if(hold) {
@@ -41,7 +45,7 @@ public class Probe extends Activity {
                     }
                 }
             } catch(Exception e){reply(result,e.toString());}
-            finally { runOnUiThread(this::finish); }
+
         }).start();
     }
     private void reply(ResultReceiver r,String value){Bundle b=new Bundle();b.putString("value",value);r.send(0,b);}
