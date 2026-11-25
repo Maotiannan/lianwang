@@ -1,6 +1,8 @@
 # 联网
 
-按应用选择自动、直连或代理。各平台的安装方式和支持范围随对应版本发布。
+按应用选择自动、直连或代理。Windows 从任务栏箭头操作，Android 从应用列表操作。
+
+**下载安装**　[Windows x64 安装程序](https://github.com/Maotiannan/lianwang/releases/latest/download/Lianwang-Windows-x64-Setup.exe) · [Android APK](https://github.com/Maotiannan/lianwang/releases/latest/download/Lianwang-Android.apk) · [版本与校验值](https://github.com/Maotiannan/lianwang/releases/latest)
 
 ## Windows x64
 
