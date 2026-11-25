@@ -1,0 +1,14 @@
+const assert = require('node:assert/strict');
+const {readFileSync} = require('node:fs');
+const vm = require('node:vm');
+const source = readFileSync(__dirname + '/../src/enhancer.js','utf8');
+const apply = vm.runInNewContext(source + '\nlianwangConfig');
+const rules = ['PROCESS-NAME,ToDesk.exe,DIRECT','MATCH,Node'];
+const config = apply({rules:[...rules],proxies:[{name:'Node',type:'socks5'},{name:'Direct alias',type:'direct'}]}, 'fixture');
+assert.deepEqual(Array.from(config.rules.slice(-2)), rules);
+assert.deepEqual(Array.from(config['proxy-groups'][0].proxies),['Node']);
+assert.equal(config.listeners[0].listen,'127.0.0.1');
+assert.equal(config.listeners[0].proxy,'LW-Windows-Proxy');
+assert.equal(config.tun,undefined);
+assert.equal(apply({rules:[]},'fixture').listeners[0].proxy,'REJECT');
+assert.throws(()=>apply({listeners:[{port:29842}]},'fixture'),/29842/);
