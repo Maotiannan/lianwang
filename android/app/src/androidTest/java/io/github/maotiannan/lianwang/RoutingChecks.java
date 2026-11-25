@@ -10,14 +10,14 @@ public class RoutingChecks extends Instrumentation {
     private final java.util.ArrayList<ServiceConnection> bound = new java.util.ArrayList<>();
     private LinkedBlockingQueue<String> probe(String pkg,boolean hold){
         var queue=new LinkedBlockingQueue<String>();
-        var result=new ResultReceiver(new Handler(Looper.getMainLooper())){
-            @Override protected void onReceiveResult(int code,Bundle data){queue.add(data.getString("value",""));}
-        };
+        var result=new Messenger(new Handler(Looper.getMainLooper(), message->{
+            queue.add(message.getData().getString("value",""));return true;
+        }));
         var i=new Intent().setClassName(pkg,"io.github.maotiannan.probe.Probe");
         var connection=new ServiceConnection(){
             public void onServiceConnected(ComponentName n, IBinder binder){
                 Message request=Message.obtain(); Bundle b=new Bundle();
-                b.putParcelable("result",result); b.putBoolean("hold",hold); request.setData(b);
+                request.replyTo=result; b.putBoolean("hold",hold); request.setData(b);
                 try{new Messenger(binder).send(request);}catch(RemoteException e){queue.add(e.toString());}
             }
             public void onServiceDisconnected(ComponentName n){queue.add("Probe process disconnected");}

@@ -8,13 +8,13 @@ import java.io.*;
 
 public class Probe extends Service {
     private final Messenger messenger=new Messenger(new Handler(Looper.getMainLooper(), msg->{
-        ResultReceiver result=msg.getData().getParcelable("result");
+        Messenger result=msg.replyTo;
         boolean hold=msg.getData().getBoolean("hold");
         if(result!=null) run(result,hold);
         return true;
     }));
     @Override public IBinder onBind(Intent intent){return messenger.getBinder();}
-    private void run(ResultReceiver result,boolean hold){
+    private void run(Messenger result,boolean hold){
         new Thread(()->{
             try {
                 if(hold) {
@@ -48,5 +48,9 @@ public class Probe extends Service {
 
         }).start();
     }
-    private void reply(ResultReceiver r,String value){Bundle b=new Bundle();b.putString("value",value);r.send(0,b);}
+    private void reply(Messenger receiver,String value) {
+        Message message=Message.obtain();
+        Bundle data=new Bundle();data.putString("value",value);message.setData(data);
+        try {receiver.send(message);} catch(RemoteException e){throw new IllegalStateException(e);}
+    }
 }
