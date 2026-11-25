@@ -75,6 +75,7 @@ internal sealed class Engine : ServiceBase
             await gate.WaitAsync();
             try {
                 if (loaded && reconcile) await Recover();
+                else if (loaded && rules.ContainsValue("proxy")) await clash.FollowSelection();
             } catch { /* Clash may start after login or after the service. */ }
             finally { gate.Release(); }
             try { await Task.Delay(5000, stop.Token); } catch (OperationCanceledException) { break; }

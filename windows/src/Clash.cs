@@ -36,12 +36,35 @@ internal sealed class Clash(string sid) : IDisposable
         if (available?["LW-Windows-direct"] is null || available["LW-Windows-proxy"] is null)
             throw new IOException("请先在 Clash Verge 重新应用一次当前订阅，使联网规则生效。");
         if (!proxy) return;
+        await FollowSelection();
+    }
+
+    internal async Task FollowSelection()
+    {
         var nodes = (await Get("proxies"))["proxies"];
-        var node = nodes?["LW-Windows-Proxy"];
-        string? choice = (string?)node?["now"];
-        var type = choice == null ? null : (string?)nodes?[choice]?["type"];
-        if (string.IsNullOrEmpty(type) || new[] {"Direct","Reject","RejectDrop","Pass","Compatible","DNS"}.Contains(type, StringComparer.OrdinalIgnoreCase))
+        var group = nodes?["LW-Windows-Proxy"];
+        if (group?["all"] is not JsonArray choices || (string?)group["now"] is not string current ||
+            current is "REJECT" or "DIRECT" or "COMPATIBLE" || choices.Count == 0)
             throw new IOException("当前订阅没有可用的代理节点。");
+
+        // Provider-only nodes need not appear in GET /proxies. Membership in our group
+        // has already gone through the enhancer's real-node and provider-type filters.
+        var available = choices.Select(n => (string?)n).OfType<string>().ToHashSet(StringComparer.Ordinal);
+        var rules = (await Get("rules"))["rules"]?.AsArray();
+        string? selected = (string?)rules?.LastOrDefault(r => (string?)r?["type"] == "Match")?["proxy"];
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        while (selected != null && seen.Add(selected)) {
+            if (available.Contains(selected)) {
+                if (selected != current) {
+                    using var response = await http.PutAsync("proxies/LW-Windows-Proxy",
+                        System.Net.Http.Json.JsonContent.Create(new { name = selected }));
+                    response.EnsureSuccessStatusCode();
+                }
+                return;
+            }
+            selected = (string?)nodes?[selected]?["now"];
+        }
+        // If the subscription default is DIRECT, retain the independently selected real node.
     }
     internal async Task Refresh(string mode)
     {
