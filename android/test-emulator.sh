@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd "$(dirname "$0")"
-python3 ../windows/tests/socks_fixture.py &
+FIXTURE_RELAY_ADDRESS=10.0.2.2 python3 ../tests/socks_fixture.py &
 fixture=$!
 trap 'kill "$fixture" 2>/dev/null || true' EXIT
 adb install -r app/build/outputs/apk/debug/app-debug.apk

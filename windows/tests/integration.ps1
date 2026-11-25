@@ -29,7 +29,7 @@ try {
     $base=@{mode='rule';'mixed-port'=29181;'external-controller-pipe'="\\.\pipe\verge-mihomo-sidecar-release-$hash";rules=@();proxies=@(@{name='Fixture';type='socks5';server='127.0.0.1';port=29182;udp=$true})}
     [IO.File]::WriteAllText("$dir/base.json",($base | ConvertTo-Json -Depth 8))
     node -e "const fs=require('fs'),vm=require('vm');const f=vm.runInNewContext(fs.readFileSync(process.argv[1],'utf8')+';main');fs.writeFileSync(process.argv[3],JSON.stringify(f(JSON.parse(fs.readFileSync(process.argv[2],'utf8')))))" $hook "$dir/base.json" "$dir/config.yaml"
-    $children += Start-Process python -ArgumentList "$(Resolve-Path windows/tests/socks_fixture.py)" -PassThru
+    $children += Start-Process python -ArgumentList "$(Resolve-Path tests/socks_fixture.py)" -PassThru
     $core = (Get-ChildItem "$dir/core" -Recurse -Filter '*.exe')[0].FullName
     $children += Start-Process $core -ArgumentList "-d $dir -f $dir/config.yaml" -RedirectStandardOutput "$dir/mihomo.log" -RedirectStandardError "$dir/mihomo.err" -PassThru
     $ready=$false

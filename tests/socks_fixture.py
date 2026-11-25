@@ -1,6 +1,8 @@
 """Isolated SOCKS5 endpoint: answer locally, never connect to the requested destination."""
 import asyncio
 import struct
+import ipaddress
+import os
 
 HTTP = b"HTTP/1.1 200 OK\r\nContent-Length: 5\r\nConnection: close\r\n\r\nPROXY"
 async def handle(reader, writer):
@@ -15,7 +17,8 @@ async def handle(reader, writer):
         if count is None:
             count = (await reader.readexactly(1))[0]
         await reader.readexactly(count + 2)
-        writer.write(b"\x05\x00\x00\x01\x7f\x00\x00\x01" + struct.pack("!H",29183))
+        relay = ipaddress.IPv4Address(os.environ.get("FIXTURE_RELAY_ADDRESS", "127.0.0.1")).packed
+        writer.write(b"\x05\x00\x00\x01" + relay + struct.pack("!H",29183))
         await writer.drain()
         if command == 3:
             await reader.read()

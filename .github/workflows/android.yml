@@ -1,7 +1,7 @@
 name: Android
 on:
   push:
-    paths: ['android/**', '.github/workflows/android.yml']
+    paths: ['tests/socks_fixture.py', 'android/**', '.github/workflows/android.yml']
   workflow_dispatch:
 permissions:
   contents: read
