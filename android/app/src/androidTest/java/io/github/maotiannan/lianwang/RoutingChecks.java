@@ -29,6 +29,7 @@ public class RoutingChecks extends Instrumentation {
             ctx.startActivity(new Intent(ctx,MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             Thread.sleep(500);
             p.edit().clear().putString("proxy","socks5://10.0.2.2:29182").putString("app."+guard,"proxy").commit();
+            if (android.net.VpnService.prepare(ctx) != null) throw new AssertionError("Emulator has not granted VPN consent");
             ctx.startForegroundService(new Intent(ctx,RoutingService.class));
             for(int n=0;n<80&&!RoutingService.active;n++)Thread.sleep(100);
             if(!RoutingService.active)throw new AssertionError("VPN failed: "+RoutingService.message);
