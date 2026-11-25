@@ -52,10 +52,15 @@ try {
     $app=(Get-Item $app).FullName; $other=(Get-Item $other).FullName
     Explicit 'LOCAL'
     Choose $other 'proxy'
+    # Injected WAN traffic arrives from this synthetic remote IP at the private relay.
+    foreach($entry in @{TCP=34010;UDP=34011}.GetEnumerator()) {
+        New-NetFirewallRule -DisplayName "Fixture $($entry.Key)" -Program $exe.Replace('/','\') -Direction Inbound -Action Allow -Protocol $entry.Key -LocalPort $entry.Value -RemoteAddress 192.0.2.81 | Out-Null
+    }
+    Get-NetTCPConnection -LocalPort 34010,29842 -State Listen | Select-Object LocalPort,OwningProcess | Format-Table
     $guard=Start-Process $other "$dir/heartbeat" -PassThru -RedirectStandardError "$dir/guard.err"
     $children += $guard
     for($i=0;$i -lt 60 -and !(Test-Path "$dir/heartbeat.ready");$i++) {Start-Sleep -Milliseconds 250}
-    if(!(Test-Path "$dir/heartbeat.ready")) {throw "TCP/UDP session did not start: $(Get-Content $dir/guard.err)"}
+    if(!(Test-Path "$dir/heartbeat.ready")) {Get-Content "$dir/mihomo.log" -Tail 14 | ForEach-Object { $_ -replace '[0-9a-f]{64}','[redacted]' }; throw "TCP/UDP session did not start: $(Get-Content $dir/guard.err)"}
     foreach($mode in 'proxy','direct','auto','proxy','auto') {
         Choose $app $mode
         if($mode -eq 'proxy') {
