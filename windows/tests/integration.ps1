@@ -40,7 +40,7 @@ try {
     $app = "$dir/target.exe"
     Copy-Item "$env:SystemRoot/System32/curl.exe" $app
     $other="$dir/guard.exe"
-    & "$env:WINDIR/Microsoft.NET/Framework64/v4.0.30319/csc.exe" /nologo "/out:$other" windows/tests/Probe.cs
+    & "$env:WINDIR/Microsoft.NET/Framework64/v4.0.30319/csc.exe" /nologo "/out:$other" (Resolve-Path windows/tests/Probe.cs).Path
     if($LASTEXITCODE) {throw 'Probe build failed'}
     $guard=$null
     function Choose($file,$mode) { RunGui "--set `"$file`" $mode" }
