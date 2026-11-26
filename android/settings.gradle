@@ -1,5 +1,0 @@
-pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
-dependencyResolutionManagement { repositories { google(); mavenCentral() } }
-rootProject.name = 'Lianwang'
-include ':app'
-include ':probe'
