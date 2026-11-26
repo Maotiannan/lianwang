@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>local.network-egress.login</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Applications/联网.app/Contents/MacOS/NetworkEgress</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <false/>
+    <key>LimitLoadToSessionType</key>
+    <string>Aqua</string>
+    <key>AssociatedBundleIdentifiers</key>
+    <array>
+        <string>local.network-egress.menu</string>
+    </array>
+</dict>
+</plist>
